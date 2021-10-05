@@ -7,19 +7,28 @@
             @if(count($assignedTasks) > 0)
                 <table class="table">
                     <tbody>
+                    <tr style="color: steelblue">
+                        <th >{{ __('Title') }}</th>
+                        <th >{{ __('Description') }}</th>
+                        <th >{{ __('Priority') }}</th>
+                        <th >{{ __('Created At') }}</th>
+                    </tr>
                     @foreach ($assignedTasks as $task)
                         <tr>
-                            <td>
+                            <td >
                                 {{ $task->title }}
                             </td>
-                            <td>
-                                {{ $task->description }}
+                            <td style="width: 40%">
+                                {!! $task->description !!}
                             </td>
                             <td>
-                                {{ $employee->priority }}
-                            </td>
-                            <td>
-                                {{ $task->department->name }}
+                                @if($task->priority === 'High')
+                                   <p style="color: red">{{ $task->priority }} </p>
+                                @elseif($task->priority === 'Medium')
+                                    <p style="color: green">{{ $task->priority }} </p>
+                                @else
+                                    <p style="color: blue">{{ $task->priority }} </p>
+                                @endif
                             </td>
                             <td>
                                 {{ $task->created_at }}

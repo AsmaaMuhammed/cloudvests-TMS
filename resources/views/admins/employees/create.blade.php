@@ -12,7 +12,7 @@
                     @method('PUT')
                 @endif
                 <div class="form-group">
-                    <label for="employee title">{{ __('Name') }}:</label>
+                    <label for="employee name">{{ __('Name') }}:</label>
                     <input type="text" required class="form-control @error('name') is-invalid @enderror"  name="name" placeholder="Add a name" value="{{ isset($employee) ? $employee->user->name : old('name') }}">
 
                     @error('name')

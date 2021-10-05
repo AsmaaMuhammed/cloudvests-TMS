@@ -27,8 +27,7 @@
                                 {{ $task->title }}
                             </td>
                             <td>
-                                {{--{{!! str_limit($task->description, $limit = 100, $end = '...') }}--}}
-                                {{!! (substr($task->description,0,150).".....") !!}}
+                                {!! $task->getPartDescription($task->description) !!}
                             </td>
                             <td>
                                 {{ $task->priority }}

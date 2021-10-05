@@ -16,7 +16,12 @@ class Task extends Model
     /**
      * @var array
      */
-    protected $fillable = ['title', 'description', 'priority', 'assigned_to'];
+    protected $fillable = ['title','company_id', 'description', 'priority', 'assigned_to'];
+
+    public function getPartDescription($value)
+    {
+        return substr($value,0,50).".....";
+    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
