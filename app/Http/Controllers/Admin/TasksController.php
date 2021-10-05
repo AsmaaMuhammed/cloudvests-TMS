@@ -6,14 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskRequest;
 use App\Models\Employee;
 use App\Models\Task;
+use App\Repositories\TaskRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class TasksController extends Controller
 {
     public $companyId;
-
-    public function __construct() {
+    public $task;
+    public function __construct(TaskRepository $task) {
 
         $this->middleware(function ($request, $next) {
             $this->companyId = auth()->user()->company->id;
@@ -21,6 +22,7 @@ class TasksController extends Controller
             return $next($request);
         });
         $this->middleware('admin');
+        $this->task = $task;
     }
     /**
      * Display a listing of the resource.
@@ -54,14 +56,7 @@ class TasksController extends Controller
      */
     public function store(TaskRequest $request)
     {
-        Task::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'company_id'=> $this->companyId,
-            'priority' => $request->priority,
-            'assigned_to' => $request->assigned_to
-        ]);
-
+        $this->task->store($request);
         session()->flash('success', 'Task created successfully');
         return redirect(route('admin.tasks.index'));
     }
@@ -104,14 +99,7 @@ class TasksController extends Controller
     public function update(TaskRequest $request, Task $task)
     {
         if (auth()->user()->can('update', $task)) {
-            $data = [
-                'title' => $request->title,
-                'description' => $request->description,
-                'company_id' => $this->companyId,
-                'priority' => $request->priority,
-                'assigned_to' => $request->assigned_to
-            ];
-            $task->update($data);
+            $this->task->update($request, $task);
 
             session()->flash('success', 'Task updated successfully');
             return redirect(route('admin.tasks.index'));

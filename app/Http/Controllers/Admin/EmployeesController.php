@@ -7,14 +7,17 @@ use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Task;
 use App\Models\User;
+use App\Repositories\EmployeeRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class EmployeesController extends Controller
 {
+    public $employee ;
 
-    public function __construct() {
+    public function __construct(EmployeeRepository $employee) {
         $this->middleware('admin', ['except' => ['assignedTasks']]);
+        $this->employee = $employee;
     }
     /**
      * Display a listing of the resource.
@@ -46,27 +49,7 @@ class EmployeesController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => ['required','string'],
-            'mobile' => ['required','regex:/^([0-9\s\-\+\(\)]*)$/','min:10'],
-            'department_id' => 'required',
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'type'=>'employee',
-            'email' => $request->email,
-            'password'=> \Hash::make($request->password)
-        ]);
-
-        Employee::create([
-            'mobile' => $request->mobile,
-            'company_id'=>auth()->user()->company->id,
-            'department_id' => $request->department_id,
-            'user_id' => $user->id
-        ]);
+        $this->employee->store($request);
 
         session()->flash('success', 'Employee created successfully');
         return redirect(route('admin.employees.index'));
@@ -110,29 +93,8 @@ class EmployeesController extends Controller
     public function update(Request $request, Employee $employee)
     {
         if (auth()->user()->can('update', $employee)) {
-            $request->validate([
-                'name' => ['required', 'string'],
-                'mobile' => ['required', 'regex:/^([0-9\s\-\+\(\)]*)$/', 'min:10'],
-                'department_id' => 'required',
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $employee->user->id]
-            ]);
 
-            $user = User::find($employee->user_id);
-
-            $userData = [
-                'name' => $request->name,
-                'email' => $request->email
-            ];
-
-            isset($request->password) ? $userData['password'] = \Hash::make($request->password) : '';
-
-            $employeeData = [
-                'mobile' => $request->mobile,
-                'department_id' => $request->department_id,
-            ];
-
-            $employee->update($employeeData);
-            $user->update($userData);
+            $this->employee->update($request, $employee);
 
             session()->flash('success', 'Employee updated successfully');
             return redirect(route('admin.employees.index'));

@@ -20,7 +20,7 @@ class Task extends Model
 
     public function getPartDescription($value)
     {
-        return substr($value,0,50).".....";
+        return substr($value,0,20).".....";
     }
 
     /**
