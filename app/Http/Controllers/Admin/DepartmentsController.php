@@ -3,10 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
 use Illuminate\Http\Request;
 
+/**
+ * Class DepartmentsController
+ * @package App\Http\Controllers\Admin
+ */
 class DepartmentsController extends Controller
 {
+    public function __construct() {
+        $this->middleware('admin');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +22,8 @@ class DepartmentsController extends Controller
      */
     public function index()
     {
-        return view('admin.departments.index');
+        $companyId = auth()->user()->company->id;
+        return view('admins.departments.index', ['departments' => Department::where('company_id', $companyId)->get()]);
     }
 
     /**
@@ -24,7 +33,7 @@ class DepartmentsController extends Controller
      */
     public function create()
     {
-        //
+        return view('admins.departments.create');
     }
 
     /**
@@ -35,7 +44,16 @@ class DepartmentsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $companyId = auth()->user()->company->id;
+
+        $data = $request->all();
+        $data['company_id'] = $companyId;
+
+        Department::create($data);
+
+        session()->flash('success', 'Department created successfully');
+
+        return redirect(route('admin.departments.index'));
     }
 
     /**
@@ -46,40 +64,46 @@ class DepartmentsController extends Controller
      */
     public function show($id)
     {
-        //
+
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Department $department)
     {
-        //
+        return view('admins.departments.create', ['department' => $department]);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Department $department)
     {
-        //
+        $department->update([
+            'name' => $request->name
+        ]);
+
+        session()->flash('success', 'Department updated successfuly');
+        return redirect(route('admin.departments.index'));
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Department $department)
     {
-        //
+        $department->delete();
+        return redirect(route('admin.departments.index'));
     }
 }

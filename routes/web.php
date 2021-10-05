@@ -27,5 +27,8 @@ Route::group([ 'prefix' => 'admin', 'as'=>'admin.', 'namespace' => 'App\Http\Con
     Route::resource('employees', EmployeesController::class);
     Route::resource('departments', DepartmentsController::class);
     Route::resource('tasks', TasksController::class);
-    Route::get('employees/assigned_tasks', [\App\Http\Controllers\Admin\EmployeesController::class, 'assignedTasks'])->name('employees.assigned_tasks');
+});
+
+Route::group(['as'=>'admin.', 'namespace' => 'App\Http\Controllers\Admin', 'middleware' => 'employee'], function() {
+    Route::get('/employees/assigned_tasks', [\App\Http\Controllers\Admin\EmployeesController::class, 'assignedTasks'])->name('employees.assigned_tasks');
 });

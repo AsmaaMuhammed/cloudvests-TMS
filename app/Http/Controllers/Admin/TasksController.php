@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Task;
 use Illuminate\Http\Request;
 
 class TasksController extends Controller
@@ -14,7 +15,9 @@ class TasksController extends Controller
      */
     public function index()
     {
-        return view('admin.tasks.index');
+        $companyId = auth()->user()->company->id;
+        $tasks = Task::where('company_id', $companyId)->get();
+        return view('admins.tasks.index', ['tasks' => $tasks]);
     }
 
     /**

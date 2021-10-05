@@ -1,9 +1,9 @@
 @if (auth()->user()->isAdmin())
     <li class="list-group-item">
-        <a href="{{route('admin.employees.index')}}">Employees</a>
+        <a href="{{ route('admin.departments.index') }}">Departments</a>
     </li>
     <li class="list-group-item">
-        <a href="{{ route('admin.departments.index') }}">Departments</a>
+        <a href="{{route('admin.employees.index')}}">Employees</a>
     </li>
     <li class="list-group-item">
         <a href="{{ route('admin.tasks.index') }}">Tasks</a>

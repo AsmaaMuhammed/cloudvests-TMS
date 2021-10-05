@@ -24,9 +24,16 @@
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
+                @auth
+                    <a class="navbar-brand" href="{{ route(config('custom.roles_destinations')[auth()->user()->type])}}">
+                        {{ config('app.name', 'Laravel') }}
+                        @if(auth()->user()->isAdmin()) <b> {{ auth()->user()->name }} Company</b> @endif
+                    </a>
+                @else
+                    <a class="navbar-brand" href="{{ url('/home')}}">
+                        {{ config('app.name', 'Laravel') }}
+                    </a>
+                @endauth
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -78,7 +85,9 @@
 
         @auth
         <div class="container">
+
             @if (session()->has('success'))
+                <br>
                 <div class="alert alert-success">
                     {{ session()->get('success') }}
                 </div>

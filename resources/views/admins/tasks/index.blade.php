@@ -7,43 +7,44 @@
         </div>
     @endif
     <div class="clearfix">
-        <a href="{{ route('admin.employees.create') }}" class="btn float-right btn-success" style="margin-bottom: 10px">Add Employee</a>
+        <a href="{{ route('admin.tasks.create') }}" class="btn float-right btn-success" style="margin-bottom: 10px">Add Task</a>
     </div>
     <div class="card card-default">
-        <div class="card-header">All Employees</div>
+        <div class="card-header">All Tasks</div>
         <table class="card-body">
-            @if(count($employees) > 0)
+            @if(count($tasks) > 0)
                 <table class="table">
                     <tbody>
                     <tr>
-                        <th >{{ __('Name') }}</th>
-                        <th >{{ __('E-Mail Address') }}</th>
-                        <th >{{ __('Mobile') }}</th>
-                        <th >{{ __('Department') }}</th>
+                        <th >{{ __('Title') }}</th>
+                        <th >{{ __('Description') }}</th>
+                        <th >{{ __('Priority') }}</th>
+                        <th >{{ __('Assigned To') }}</th>
                     </tr>
-                    @foreach ($employees as $employee)
+                    @foreach ($tasks as $task)
                         <tr>
                             <td>
-                                {{ $employee->user->name }}
+                                {{ $task->title }}
                             </td>
                             <td>
-                                {{ $employee->user->email }}
+                                {{--{{!! str_limit($task->description, $limit = 100, $end = '...') }}--}}
+                                {{!! (substr($task->description,0,150).".....") !!}}
                             </td>
                             <td>
-                                {{ $employee->mobile }}
+                                {{ $task->priority }}
                             </td>
                             <td>
-                                {{ $employee->department->name }}
+                                {{ $task->employee->user->name }}
                             </td>
                             <td>
-                                <form class="float-right ml-2" action="{{route('admin.employees.destroy', $employee->id)}}" method="POST">
+                                <form class="float-right ml-2" action="{{route('admin.tasks.destroy', $task->id)}}" method="POST">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-danger btn-sm">
                                         Delete
                                     </button>
                                 </form>
-                                <a href="{{route('admin.employees.edit', $employee->id)}}" class="btn btn-primary float-right btn-sm">Edit</a>
+                                <a href="{{route('admin.tasks.edit', $task->id)}}" class="btn btn-primary float-right btn-sm">Edit</a>
                             </td>
                         </tr>
                     @endforeach
@@ -52,7 +53,7 @@
             @else
                 <div class="card-body">
                     <h1 class="text-center">
-                        No Employees Yet.
+                        No Tasks Yet.
                     </h1>
                 </div>
             @endif
