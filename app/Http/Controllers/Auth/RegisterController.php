@@ -41,7 +41,7 @@ class RegisterController extends Controller
      */
     public function redirectTo()
     {
-        $this->redirectTo = route(config('custom.roles_destinations')[Auth::user()->type]);
+        $this->redirectTo = route(config('custom.roles_destinations')['admin']);// registration for company only
         return $this->redirectTo;
     }
     /**

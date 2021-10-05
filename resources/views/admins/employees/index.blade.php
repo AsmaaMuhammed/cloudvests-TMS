@@ -6,9 +6,9 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">{{ __('Home') }}</div>
-                        <h1>
-                            I am Admin
-                        </h1>
+                    <h1>
+                        I am employee
+                    </h1>
                 </div>
             </div>
         </div>

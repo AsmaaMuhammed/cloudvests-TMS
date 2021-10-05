@@ -7,7 +7,7 @@
                 <div class="card">
                     <div class="card-header">{{ __('Home') }}</div>
                         <h1>
-                            I am Admin
+                            I am Task
                         </h1>
                 </div>
             </div>

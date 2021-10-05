@@ -20,3 +20,12 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::group([ 'prefix' => 'admin', 'as'=>'admin.', 'namespace' => 'App\Http\Controllers\Admin', 'middleware' => 'admin'], function(){
+    Route::get('/home', [\App\Http\Controllers\Admin\HomeController::class, 'index'])->name('index');
+
+    Route::resource('employees', EmployeesController::class);
+    Route::resource('departments', DepartmentsController::class);
+    Route::resource('tasks', TasksController::class);
+    Route::get('employees/assigned_tasks', [\App\Http\Controllers\Admin\EmployeesController::class, 'assignedTasks'])->name('employees.assigned_tasks');
+});

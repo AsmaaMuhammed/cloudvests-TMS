@@ -25,7 +25,13 @@
             @if (Route::has('login'))
                 <div class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
                     @auth
-                        <a href="{{ url('/home') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Home</a>
+                        @if (auth()->user()->isAdmin())
+                            <a href="{{ route('admin.index') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Home</a>
+                        @elseif(auth()->user()->isEmployee())
+                            <a href="{{ route('admin.employees.index') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Home</a>
+                        @else
+                            <a href="{{ route('home') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Home</a>
+                        @endif
                     @else
                         <a href="{{ route('login') }}" class="btn btn-primary">Log in</a>
 
