@@ -5,7 +5,12 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\Auth;
 
+/**
+ * Class LoginController
+ * @package App\Http\Controllers\Auth
+ */
 class LoginController extends Controller
 {
     /*
@@ -28,6 +33,14 @@ class LoginController extends Controller
      */
     protected $redirectTo = RouteServiceProvider::HOME;
 
+    /**
+     * @return string
+     */
+    public function redirectTo()
+    {
+        $this->redirectTo = route(config('custom.roles_destinations')[Auth::user()->type]);
+        return $this->redirectTo;
+    }
     /**
      * Create a new controller instance.
      *
