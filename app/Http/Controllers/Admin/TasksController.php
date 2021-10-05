@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskRequest;
 use App\Models\Employee;
 use App\Models\Task;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class TasksController extends Controller
@@ -29,7 +30,7 @@ class TasksController extends Controller
     public function index()
     {
 
-        $tasks = Task::where('company_id', $this->companyId)->get();
+        $tasks = Task::where('company_id', $this->companyId)->latest()->cursorPaginate(2);
         return view('admins.tasks.index', ['tasks' => $tasks]);
     }
 
@@ -80,13 +81,17 @@ class TasksController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  Task $task
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response | RedirectResponse
      */
     public function edit(Task $task)
     {
-        $priorities = ['High', 'Medium', 'Low'];
-        $employees = Employee::where('company_id', $this->companyId)->get();
-        return view('admins.tasks.create', ['employees' => $employees, 'priorities' => $priorities, 'task'=> $task]);
+        if (auth()->user()->can('update', $task)) {
+            $priorities = ['High', 'Medium', 'Low'];
+            $employees = Employee::where('company_id', $this->companyId)->get();
+            return view('admins.tasks.create', ['employees' => $employees, 'priorities' => $priorities, 'task' => $task]);
+        }
+        else
+            return redirect('admin/tasks')->with('error', 'You don\'t have access to required data');
     }
 
     /**
@@ -94,32 +99,40 @@ class TasksController extends Controller
      *
      * @param  \App\Http\Requests\TaskRequest $request
      * @param  Task $task
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response | RedirectResponse
      */
     public function update(TaskRequest $request, Task $task)
     {
-        $data = [
-            'title' => $request->title,
-            'description' => $request->description,
-            'company_id'=> $this->companyId,
-            'priority' => $request->priority,
-            'assigned_to' => $request->assigned_to
-        ];
-        $task->update($data);
+        if (auth()->user()->can('update', $task)) {
+            $data = [
+                'title' => $request->title,
+                'description' => $request->description,
+                'company_id' => $this->companyId,
+                'priority' => $request->priority,
+                'assigned_to' => $request->assigned_to
+            ];
+            $task->update($data);
 
-        session()->flash('success', 'Task updated successfully');
-        return redirect(route('admin.tasks.index'));
+            session()->flash('success', 'Task updated successfully');
+            return redirect(route('admin.tasks.index'));
+        }
+        else
+            return redirect('admin/tasks')->with('error', 'You don\'t have access to required data');
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  Task $task
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response | RedirectResponse
      */
     public function destroy(Task $task)
     {
-        $task->delete();
-        return redirect(route('admin.tasks.index'));
+        if (auth()->user()->can('delete', $task)) {
+            $task->delete();
+            return redirect(route('admin.tasks.index'));
+        }
+        else
+            return redirect('admin/tasks')->with('error', 'You don\'t have access to required data');
     }
 }

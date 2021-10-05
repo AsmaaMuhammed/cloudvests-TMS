@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class EmployeesController extends Controller
@@ -23,7 +24,7 @@ class EmployeesController extends Controller
     public function index()
     {
         $companyId = auth()->user()->company->id;
-        return view('admins.employees.index', ['employees' => Employee::where('company_id', $companyId)->get()]);
+        return view('admins.employees.index', ['employees' => Employee::where('company_id', $companyId)->latest()->cursorPaginate(3)]);
     }
 
     /**
@@ -86,12 +87,16 @@ class EmployeesController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  Employee  $employee
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response | RedirectResponse
      */
     public function edit(Employee $employee)
     {
-        $companyId = auth()->user()->company->id;
-        return view('admins.employees.create', ['employee'=> $employee, 'departments' => Department::where('company_id', $companyId)->get()]);
+        if (auth()->user()->can('update', $employee)) {
+            $companyId = auth()->user()->company->id;
+            return view('admins.employees.create', ['employee' => $employee, 'departments' => Department::where('company_id', $companyId)->get()]);
+        }
+        else
+            return redirect('admin/employees')->with('error', 'You don\'t have access to required data');
 
     }
 
@@ -100,54 +105,62 @@ class EmployeesController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  Employee $employee
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response | RedirectResponse
      */
     public function update(Request $request, Employee $employee)
     {
-        $request->validate([
-            'name' => ['required','string'],
-            'mobile' => ['required','regex:/^([0-9\s\-\+\(\)]*)$/','min:10'],
-            'department_id' => 'required',
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$employee->user->id]
-        ]);
+        if (auth()->user()->can('update', $employee)) {
+            $request->validate([
+                'name' => ['required', 'string'],
+                'mobile' => ['required', 'regex:/^([0-9\s\-\+\(\)]*)$/', 'min:10'],
+                'department_id' => 'required',
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $employee->user->id]
+            ]);
 
-        $user = User::find($employee->user_id);
+            $user = User::find($employee->user_id);
 
-        $userData = [
-            'name' => $request->name,
-            'email' => $request->email
-        ];
+            $userData = [
+                'name' => $request->name,
+                'email' => $request->email
+            ];
 
-        isset($request->password)?$userData['password'] = \Hash::make($request->password) : '';
+            isset($request->password) ? $userData['password'] = \Hash::make($request->password) : '';
 
-        $employeeData = [
-            'mobile' => $request->mobile,
-            'department_id' => $request->department_id,
-        ];
+            $employeeData = [
+                'mobile' => $request->mobile,
+                'department_id' => $request->department_id,
+            ];
 
-        $employee->update($employeeData);
-        $user->update($userData);
+            $employee->update($employeeData);
+            $user->update($userData);
 
-        session()->flash('success', 'Employee updated successfully');
-        return redirect(route('admin.employees.index'));
+            session()->flash('success', 'Employee updated successfully');
+            return redirect(route('admin.employees.index'));
+        }
+        else
+            return redirect('admin/employees')->with('error', 'You don\'t have access to required data');
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  Employee $employee
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response | RedirectResponse
      */
     public function destroy(Employee $employee)
     {
-        $user = User::find($employee->user_id);
-        $user->delete();
-        $employee->delete();
-        return redirect(route('admin.employees.index'));
+        if (auth()->user()->can('delete', $employee)) {
+            $user = User::find($employee->user_id);
+            $user->delete();
+            $employee->delete();
+            return redirect(route('admin.employees.index'));
+        }
+        else
+            return redirect('admin/employees')->with('error', 'You don\'t have access to required data');
     }
 
     public function assignedTasks()
     {
-        return view('admins.employees.assigned_tasks', ['assignedTasks'=> auth()->user()->employee->tasks]);
+        return view('admins.employees.assigned_tasks', ['assignedTasks'=> auth()->user()->employee->tasks()->latest()->cursorPaginate(1)]);
     }
 }

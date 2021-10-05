@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Department;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -23,7 +24,7 @@ class DepartmentsController extends Controller
     public function index()
     {
         $companyId = auth()->user()->company->id;
-        return view('admins.departments.index', ['departments' => Department::where('company_id', $companyId)->get()]);
+        return view('admins.departments.index', ['departments' => Department::where('company_id', $companyId)->latest()->cursorPaginate(5)]);
     }
 
     /**
@@ -33,6 +34,7 @@ class DepartmentsController extends Controller
      */
     public function create()
     {
+
         return view('admins.departments.create');
     }
 
@@ -71,11 +73,15 @@ class DepartmentsController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  Department  $department
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response | RedirectResponse
      */
     public function edit(Department $department)
     {
-        return view('admins.departments.create', ['department' => $department]);
+        if (auth()->user()->can('update', $department)) {
+            return view('admins.departments.create', ['department' => $department]);
+        }
+        else
+            return redirect('admin/departments')->with('error', 'You don\'t have access to required data');
     }
 
     /**
@@ -83,13 +89,17 @@ class DepartmentsController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  Department  $department
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response | RedirectResponse
      */
     public function update(Request $request, Department $department)
     {
-        $department->update([
-            'name' => $request->name
-        ]);
+        if (auth()->user()->can('update', $department)) {
+            $department->update([
+                'name' => $request->name
+            ]);
+        }
+        else
+            return redirect('admin/departments')->with('error', 'You don\'t have access to required data');
 
         session()->flash('success', 'Department updated successfuly');
         return redirect(route('admin.departments.index'));
@@ -99,11 +109,15 @@ class DepartmentsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  Department  $department
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response| RedirectResponse
      */
     public function destroy(Department $department)
     {
-        $department->delete();
-        return redirect(route('admin.departments.index'));
+        if (auth()->user()->can('delete', $department)) {
+            $department->delete();
+            return redirect(route('admin.departments.index'));
+        }
+        else
+            return redirect('admin/departments')->with('error', 'You don\'t have access to required data');
     }
 }

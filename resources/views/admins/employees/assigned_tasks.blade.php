@@ -47,4 +47,7 @@
 
         </table>
     </div>
+    <div style="margin:5%;">
+        {{ $assignedTasks->appends(request()->query())->links() }}
+    </div>
 @endsection

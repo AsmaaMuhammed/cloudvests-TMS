@@ -6,10 +6,10 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">{{ __('Home') }}</div>
-                    <div>
-                        <h1>
+                    <div style="margin: 6%;">
+                        <h4>
                             @if(auth()->user()->isAdmin()) @auth I am <b> {{ auth()->user()->name }} </b> Company @endauth @endif
-                        </h1>
+                        </h4>
                     </div>
                 </div>
             </div>

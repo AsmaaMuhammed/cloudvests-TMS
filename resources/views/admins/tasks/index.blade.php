@@ -6,9 +6,12 @@
             {{ session()->get('error') }}
         </div>
     @endif
-    <div class="clearfix">
-        <a href="{{ route('admin.tasks.create') }}" class="btn float-right btn-success" style="margin-bottom: 10px">Add Task</a>
-    </div>
+    @can('create', \App\Models\Task::class)
+        <div class="clearfix">
+            <a href="{{ route('admin.tasks.create') }}" class="btn float-right btn-success" style="margin-bottom: 10px">Add
+                Task</a>
+        </div>
+    @endcan
     <div class="card card-default">
         <div class="card-header">All Tasks</div>
         <table class="card-body">
@@ -16,10 +19,10 @@
                 <table class="table">
                     <tbody>
                     <tr>
-                        <th >{{ __('Title') }}</th>
-                        <th >{{ __('Description') }}</th>
-                        <th >{{ __('Priority') }}</th>
-                        <th >{{ __('Assigned To') }}</th>
+                        <th>{{ __('Title') }}</th>
+                        <th>{{ __('Description') }}</th>
+                        <th>{{ __('Priority') }}</th>
+                        <th>{{ __('Assigned To') }}</th>
                     </tr>
                     @foreach ($tasks as $task)
                         <tr>
@@ -36,14 +39,21 @@
                                 {{ $task->employee->user->name }}
                             </td>
                             <td>
-                                <form class="float-right ml-2" action="{{route('admin.tasks.destroy', $task->id)}}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">
-                                        Delete
-                                    </button>
-                                </form>
-                                <a href="{{route('admin.tasks.edit', $task->id)}}" class="btn btn-primary float-right btn-sm">Edit</a>
+                                @can('delete', $task)
+                                    <form class="float-right ml-2" action="{{route('admin.tasks.destroy', $task->id)}}"
+                                          method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-danger btn-sm" type="submit"
+                                                onclick="return confirm('Sure Want Delete?')">
+                                            Delete
+                                        </button>
+                                    </form>
+                                @endcan
+                                @can('update', $task)
+                                    <a href="{{route('admin.tasks.edit', $task->id)}}"
+                                       class="btn btn-primary float-right btn-sm">Edit</a>
+                                @endcan
                             </td>
                         </tr>
                     @endforeach
@@ -58,5 +68,8 @@
             @endif
 
         </table>
+    </div>
+    <div style="margin:5%;">
+        {{ $tasks->appends(request()->query())->links() }}
     </div>
 @endsection
